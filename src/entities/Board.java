@@ -18,28 +18,24 @@ public class Board {
         }
     }
 
+    private Character getFormattedPosition(int row, int column) {
+        return positions[row][column] != null ? positions[row][column] : ' ';
+    }
+
     public void draw() {
-        for (int i = 0; i < DIMENSIONS; i++) {
-            for (int j = 0; j < DIMENSIONS; j++) {
+        System.out.println();
+        System.out.println();
 
-                if (isFilledPosition(i, j)) {
-                    System.out.print(positions[i][j]);
-                }
+        for (int i = 0; i < positions.length; i++) {
+            System.out.printf("     %c | %c | %c %n", getFormattedPosition(i, 0), getFormattedPosition(i, 1), getFormattedPosition(i,2));
 
-                if (j < 2) {
-                    System.out.print(" | ");
-                }
-            }
-            System.out.println();
-
-            if (i < 2) {
-                System.out.println("______");
+            if (i == 0 || i == 1) {
+                System.out.println("     ----------");
             }
         }
 
         System.out.println();
-
-        // logPositions();
+        System.out.println();
     }
 
     public boolean isFilledPosition(int row, int column) {
@@ -105,12 +101,12 @@ public class Board {
             throw new Exception("Jogada inválida");
         }
 
-        if (isFilledPosition(row, column)) throw new Exception("Posição já utilizada");
+        // if (isFilledPosition(row, column)) throw new Exception("Posição já utilizada");
 
         positions[row][column] = symbol;
     }
 
-    public void logPositions() {
-        System.out.println(Arrays.deepToString(positions));
+    public String toString() {
+        return Arrays.deepToString(positions);
     }
 }

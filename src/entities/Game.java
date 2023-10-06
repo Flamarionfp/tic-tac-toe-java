@@ -1,7 +1,5 @@
 package entities;
 
-import utils.Screen;
-
 import java.util.Scanner;
 
 public class Game {
@@ -10,14 +8,9 @@ public class Game {
     Player player = new Player('x');
     Cpu cpu = new Cpu('o');
     Player[] players = new Player[] {player, cpu};
-
     private Player winner;
-
     private boolean isGameOver = false;
-
-
     private void showGameReport() {
-
         if (winner == null) {
             System.out.println("Deu Velha");
         } else {
@@ -54,7 +47,6 @@ public class Game {
                 System.out.println("Coluna: ");
                 column = scanner.nextInt();
 
-
                 player.play(board, row, column);
             } catch (Exception e) {
                 invalidPlay = true;
@@ -63,7 +55,15 @@ public class Game {
         } while (invalidPlay);
     }
 
-    public void run() {
+    public void setGameOver() {
+        this.isGameOver = true;
+    }
+
+    public void setWinner(Player player) {
+        this.winner = player;
+    }
+
+    public void gameloop() {
         while (!isGameOver) {
             if (Player.getCurrentPlayerIndex() == 0) {
                 handleMakePlay();
@@ -72,18 +72,9 @@ public class Game {
             }
 
             verifyGameOver();
-            Screen.clear();
+            // System.out.println(board);
         }
 
         showGameReport();
-    }
-
-
-    public void setGameOver() {
-        this.isGameOver = true;
-    }
-
-    public void setWinner(Player player) {
-        this.winner = player;
     }
 }
