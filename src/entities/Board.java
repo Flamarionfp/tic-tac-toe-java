@@ -101,7 +101,7 @@ public class Board {
             throw new Exception("Jogada inválida");
         }
 
-        // if (isFilledPosition(row, column)) throw new Exception("Posição já utilizada");
+        if (isFilledPosition(row, column)) throw new Exception("Posição já utilizada");
 
         positions[row][column] = symbol;
     }
