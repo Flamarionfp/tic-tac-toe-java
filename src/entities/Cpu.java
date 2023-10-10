@@ -22,7 +22,7 @@ public class Cpu extends Player {
         return matchedSymbols.length == 2;
     }
 
-    private int getCriticalPosition(Object[] currentPositions, int i) {
+    private int getCriticalPosition(Object[] currentPositions) {
         return Array.findIndex(currentPositions, symbol -> symbol == null);
     }
 
@@ -33,7 +33,7 @@ public class Cpu extends Player {
                Character[] matchedSymbols = matchedSymbolsStream.toArray(Character[]::new);
 
                 if (isCritical(matchedSymbols)) {
-                    int columnToPlay = getCriticalPosition(positions[i], i);
+                    int columnToPlay = getCriticalPosition(positions[i]);
 
                     // System.out.printf("%s horizontal: [%d, %d] \n", symbolToCompare == getOponentSymbol() ? "Defendeu" : "Atacou", i, columnToPlay);
 
@@ -59,7 +59,7 @@ public class Cpu extends Player {
             Character[] matchedSymbols = matchedSymbolsStream.toArray(Character[]::new);
 
             if (isCritical(matchedSymbols)) {
-                int rowToPlay = getCriticalPosition(verticalPos.toArray(), i);
+                int rowToPlay = getCriticalPosition(verticalPos.toArray());
 
                 // System.out.printf("%s vertical: [%d, %d] \n", symbolToCompare == getOponentSymbol() ? "Defendeu" : "Atacou", rowToPlay, i);
 
@@ -67,6 +67,25 @@ public class Cpu extends Player {
             } else {
                 verticalPos.clear();
             }
+        }
+
+        return new int[]{};
+    }
+
+    private int[] getCriticalDiagonal(Character[][] positions, Character symbolToCompare) {
+        List<Character> mainDiagonalPos = new ArrayList<>();
+
+        for (int i = 0; i < positions.length; i++) {
+            mainDiagonalPos.add(positions[i][i]);
+        }
+
+        Stream<Character> matchedSymbolsStream = mainDiagonalPos.stream().filter(symbol -> symbol == symbolToCompare);
+        Character[] matchedSymbols = matchedSymbolsStream.toArray(Character[]::new);
+
+        if (isCritical(matchedSymbols)) {
+            int columnAndRowToPlay = getCriticalPosition(mainDiagonalPos.toArray());
+
+            return new int[]{columnAndRowToPlay, columnAndRowToPlay};
         }
 
         return new int[]{};
@@ -82,7 +101,8 @@ public class Cpu extends Player {
 
             Callable<int[]>[] verifyFunctions = new Callable[]{ // atribuir via laço for os valores
                     () -> getCriticalHorizontal(positions, symbolToCompare),
-                    () -> getCriticalVertical(positions, symbolToCompare)
+                    () -> getCriticalVertical(positions, symbolToCompare),
+                    () -> getCriticalDiagonal(positions, symbolToCompare)
             };
 
 
