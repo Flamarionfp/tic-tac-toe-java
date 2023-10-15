@@ -19,14 +19,73 @@ public class Cpu extends Player {
         return getSymbol() == 'x' ? 'o' : 'x';
     }
     private boolean isCritical(Character[] matchedSymbols) {
-        return matchedSymbols.length == 2;
+        return matchedSymbols.length == Board.DIMENSIONS - 1;
     }
 
     private int getCriticalPosition(Object[] currentPositions) {
         return Array.findIndex(currentPositions, symbol -> symbol == null);
     }
+    private static List<Character> getDiagonalCharacters(Character[][] positions, boolean verifyMainDiagonal) {
+        List<Character> diagonalPos = new ArrayList<>();
 
-    private int[] getCriticalHorizontal(Character[][] positions, Character symbolToCompare) {
+        if (verifyMainDiagonal) {
+            for (int i = 0; i < positions.length; i++) {
+                diagonalPos.add(positions[i][i]);
+            }
+        } else {
+            for (int i = 0; i < positions.length; i++) {
+                for (int j = 0; j < positions[i].length; j++) {
+                    if (i + j == positions.length - 1) {
+                        diagonalPos.add(positions[i][j]);
+                    }
+                }
+            }
+        }
+        return diagonalPos;
+    }
+    private int[] getCriticalDiagonal(Character[][] positions, Character symbolToCompare, boolean verifyMainDiagonal) {
+        List<Character> diagonalPos = getDiagonalCharacters(positions, verifyMainDiagonal);
+
+        int count = 0;
+        int emptyPosition = -1;
+
+        for (int i = 0; i < diagonalPos.size(); i++) {
+            if (diagonalPos.get(i) == symbolToCompare) {
+                count++;
+            } else if (diagonalPos.get(i) == null) {
+                emptyPosition = i;
+            }
+        }
+
+        if (count == Board.DIMENSIONS - 1 && emptyPosition != -1) {
+            if (verifyMainDiagonal || emptyPosition == 1) {
+                return new int[]{emptyPosition, emptyPosition};
+            } else if (emptyPosition == 2) {
+                return new int[]{emptyPosition, 0};
+            } else {
+                return new int[]{emptyPosition, 2};
+            }
+        }
+
+        return new int[]{};
+    }
+
+
+    private int[] handleGetCriticalDiagonal(Character[][] positions, Character symbolToCompare) {
+        int[] criticalDiagonal = new int[]{};
+
+        for (int i = 0; i < Board.DIMENSIONS - 1; i++) {
+            criticalDiagonal =  getCriticalDiagonal(positions, symbolToCompare, i == 0);
+
+            if (criticalDiagonal.length > 0) {
+                return criticalDiagonal;
+            }
+        }
+
+        return criticalDiagonal;
+    }
+
+    private int[] handleGetCriticalHorizontal(Character[][] positions, Character symbolToCompare) {
         for (int i = 0; i < positions.length; i++) {
             for (int j = 0; j < positions[i].length; j++) {
                 Stream<Character> matchedSymbolsStream = Arrays.stream(positions[i]).filter(symbol -> symbol == symbolToCompare);
@@ -34,8 +93,6 @@ public class Cpu extends Player {
 
                 if (isCritical(matchedSymbols)) {
                     int columnToPlay = getCriticalPosition(positions[i]);
-
-                    // System.out.printf("%s horizontal: [%d, %d] \n", symbolToCompare == getOponentSymbol() ? "Defendeu" : "Atacou", i, columnToPlay);
 
                     return columnToPlay == -1 ? new int[]{} : new int[]{i, columnToPlay};
                 }
@@ -45,7 +102,7 @@ public class Cpu extends Player {
         return new int[]{};
     }
 
-    private int[] getCriticalVertical(Character[][] positions, Character symbolToCompare) {
+    private int[] handleGetCriticalVertical(Character[][] positions, Character symbolToCompare) {
         List<Character> verticalPos = new ArrayList<>();
 
         for (int i = 0; i < positions.length; i++) {
@@ -53,15 +110,11 @@ public class Cpu extends Player {
                 verticalPos.add(positions[j][i]);
             }
 
-            // System.out.println("VERTICAL POS" + Arrays.toString(verticalPos.toArray()));
-
             Stream<Character> matchedSymbolsStream = verticalPos.stream().filter(symbol -> symbol == symbolToCompare);
             Character[] matchedSymbols = matchedSymbolsStream.toArray(Character[]::new);
 
             if (isCritical(matchedSymbols)) {
                 int rowToPlay = getCriticalPosition(verticalPos.toArray());
-
-                // System.out.printf("%s vertical: [%d, %d] \n", symbolToCompare == getOponentSymbol() ? "Defendeu" : "Atacou", rowToPlay, i);
 
                 return rowToPlay == -1 ? new int[]{} : new int[]{rowToPlay, i};
             } else {
@@ -72,23 +125,15 @@ public class Cpu extends Player {
         return new int[]{};
     }
 
-    private int[] getCriticalDiagonal(Character[][] positions, Character symbolToCompare) {
-        List<Character> mainDiagonalPos = new ArrayList<>();
-
-        for (int i = 0; i < positions.length; i++) {
-            mainDiagonalPos.add(positions[i][i]);
-        }
-
-        Stream<Character> matchedSymbolsStream = mainDiagonalPos.stream().filter(symbol -> symbol == symbolToCompare);
-        Character[] matchedSymbols = matchedSymbolsStream.toArray(Character[]::new);
-
-        if (isCritical(matchedSymbols)) {
-            int columnAndRowToPlay = getCriticalPosition(mainDiagonalPos.toArray());
-
-            return new int[]{columnAndRowToPlay, columnAndRowToPlay};
-        }
-
-        return new int[]{};
+    private Callable<int[]>[] getVerifyFunctions(Character[][] positions) {
+        return (Callable<int[]>[]) new Callable[]{
+                () -> handleGetCriticalHorizontal(positions, getSymbol()),
+                () -> handleGetCriticalVertical(positions, getSymbol()),
+                () -> handleGetCriticalDiagonal(positions, getSymbol()),
+                () -> handleGetCriticalHorizontal(positions, getOponentSymbol()),
+                () -> handleGetCriticalVertical(positions, getOponentSymbol()),
+                () -> handleGetCriticalDiagonal(positions, getOponentSymbol()),
+        };
     }
 
     private int[] handleGetBetterPositionToPlay(Character[][] positions) throws Exception {
@@ -96,14 +141,7 @@ public class Cpu extends Player {
         int[] positionToPlay = new int[]{};
 
         while (positionToPlay.length == 0) {
-            // Menor ? defender : Atacar (inverter isso, pois a prioridade é ganhar)
-            Character symbolToCompare = i < Board.DIMENSIONS ? getOponentSymbol() : getSymbol();
-
-            Callable<int[]>[] verifyFunctions = new Callable[]{ // atribuir via laço for os valores
-                    () -> getCriticalHorizontal(positions, symbolToCompare),
-                    () -> getCriticalVertical(positions, symbolToCompare),
-                    () -> getCriticalDiagonal(positions, symbolToCompare)
-            };
+            Callable<int[]>[] verifyFunctions = getVerifyFunctions(positions);
 
 
             positionToPlay = verifyFunctions[i].call();
@@ -113,22 +151,19 @@ public class Cpu extends Player {
                 int randomRow = random.nextInt(Board.DIMENSIONS);
                 int randomColumn = random.nextInt(Board.DIMENSIONS);
 
-                // System.out.printf("Jogou random randomRow: %d randomColumn: %d \n", randomRow, randomColumn);
-
                 positionToPlay = new int[]{randomRow, randomColumn};
             }
         }
 
         return positionToPlay;
     }
-
     public void play(Board board) {
         try {
             int[] positionToPlay;
 
             do {
                 positionToPlay = handleGetBetterPositionToPlay(board.positions);
-            } while (board.isFilledPosition(positionToPlay[0], positionToPlay[1])); // Pegar as posições restantes em vez de "chutar" se necessário
+            } while (board.isFilledPosition(positionToPlay[0], positionToPlay[1]));
 
             System.out.println("Debug ia play " + Arrays.toString(positionToPlay));
             super.play(board, positionToPlay[0], positionToPlay[1]);
