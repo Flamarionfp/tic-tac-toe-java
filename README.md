@@ -1,3 +1,3 @@
 ### Jogo da Velha
 
-https://ibb.co/TWJkDk4
+https://i.ibb.co/41C7w78/Screenshot-1.png
