@@ -165,7 +165,7 @@ public class Cpu extends Player {
                 positionToPlay = handleGetBetterPositionToPlay(board.positions);
             } while (board.isFilledPosition(positionToPlay[0], positionToPlay[1]));
 
-            System.out.println("Debug ia play " + Arrays.toString(positionToPlay));
+            // System.out.println("Debug ia play " + Arrays.toString(positionToPlay));
             super.play(board, positionToPlay[0], positionToPlay[1]);
         } catch (Exception e) {
             System.out.println(e.getMessage());
