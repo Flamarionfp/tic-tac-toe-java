@@ -59,6 +59,8 @@ public class Game {
         int row, column;
         boolean invalidPlay = false;
 
+        if (board.isAllFilled()) return;
+
         do {
             try {
                 System.out.println("Jogador " + symbols.get(Player.getCurrentPlayerIndex())  + ", digite a linha e coluna que deseja jogar ");
