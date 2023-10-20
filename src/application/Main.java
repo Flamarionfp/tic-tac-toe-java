@@ -4,6 +4,9 @@ import entities.Game;
 
 import java.util.*;
 
+/**
+ * @author Flamarion Fagundes
+ */
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);

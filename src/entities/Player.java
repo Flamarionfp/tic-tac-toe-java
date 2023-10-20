@@ -1,5 +1,8 @@
 package entities;
 
+/**
+ * @author Flamarion Fagundes
+ */
 public class Player {
     private static int currentPlayerIndex;
     private final Character symbol;

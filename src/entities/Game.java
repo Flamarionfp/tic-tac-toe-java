@@ -3,6 +3,9 @@ package entities;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * @author Flamarion Fagundes
+ */
 public class Game {
     Scanner scanner = new Scanner(System.in);
     Board board = new Board();

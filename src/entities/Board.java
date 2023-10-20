@@ -2,6 +2,9 @@ package entities;
 
 import java.util.Arrays;
 
+/**
+ * @author Flamarion Fagundes
+ */
 public class Board {
     public static final int DIMENSIONS = 3;
     Character[][] positions = new Character[DIMENSIONS][DIMENSIONS];

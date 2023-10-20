@@ -8,6 +8,9 @@ import java.util.stream.Stream;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author Flamarion Fagundes
+ */
 public class Cpu extends Player {
     Random random = new Random();
 
