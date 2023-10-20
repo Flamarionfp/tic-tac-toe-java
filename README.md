@@ -7,5 +7,4 @@ Esse jogo foi feito para o trabalho da disciplina de Programação III para o cu
 * Jogar contra o computador (inteligência programada para tentar vencer o jogo ou defender jogadas que resultem em vitória do adversário)
 * Jogar multiplayer (local) contra outro jogador)
 
-
-
+[Imagem capturada do Jogo](https://i.ibb.co/41C7w78/Screenshot-1.png)
